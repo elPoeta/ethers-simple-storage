@@ -1,15 +1,11 @@
 import { ethers } from "ethers";
 import * as fs from "fs-extra";
+import "dotenv/config";
 
 const main = async () => {
   //connect with ganache
-  const provider = new ethers.providers.JsonRpcProvider(
-    "http://127.0.0.1:7545"
-  );
-  const wallet = new ethers.Wallet(
-    "4c0271da680adce05c6f5b75a9ab3e2447e78d294444c6a0c2041ee5fc1aaf55",
-    provider
-  );
+  const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL!);
+  const wallet = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
   const abi = fs.readFileSync("./SimpleStorage_sol_SimpleStorage.abi", "utf8");
   const binary = fs.readFileSync(
     "./SimpleStorage_sol_SimpleStorage.bin",
@@ -35,6 +31,14 @@ const main = async () => {
   // const sentTxResponse = await wallet.sendTransaction(tx);
   // await sentTxResponse.wait(1);
   // console.log(sentTxResponse);
+
+  const currentFavoriteNumber = await contract.retrieve();
+  console.log(`current favorite number: ${currentFavoriteNumber.toString()}`);
+  const transactionStoreResponse = await contract.store("5");
+  // const transactionStoreResreceipt = await transactionStoreResponse.wait(1);
+  await transactionStoreResponse.wait(1);
+  const updatedFavoriteNumber = await contract.retrieve();
+  console.log(`updated favorite number: ${updatedFavoriteNumber.toString()}`);
 };
 
 main()
